@@ -1,0 +1,1294 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SILKYSINGZ | GAMBIA RAINWATER HARVESTING INTELLIGENCE</title>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+
+<style>
+:root{
+ --bg:#091827;--panel:#10243a;--panel2:#142c43;
+ --line:#294158;--text:#e6f0f8;--muted:#91a7ba;
+ --cyan:#45d4d0;--gold:#f4c34e;
+}
+*{box-sizing:border-box}
+html,body{margin:0;width:100%;height:100%;overflow:hidden}
+body{background:var(--bg);color:var(--text);font:13px Arial,sans-serif}
+header{
+ height:72px;background:#0b1b2c;border-bottom:1px solid var(--line);
+ display:flex;align-items:center;justify-content:space-between;padding:10px 20px
+}
+.brand{font-size:18px;font-weight:800;letter-spacing:.5px}
+.brand span{color:var(--cyan)}
+.subtitle{font-size:10px;color:var(--muted);margin-top:5px}
+.headmeta{text-align:right;color:var(--muted);font-size:10px;line-height:1.6}
+main{
+ height:calc(100vh - 72px);padding:9px;display:grid;
+ grid-template-columns:300px minmax(350px,1fr) 335px;gap:9px;min-height:0
+}
+.panel{
+ background:var(--panel);border:1px solid var(--line);border-radius:7px;
+ min-height:0;overflow:hidden;display:flex;flex-direction:column
+}
+.panel-title{
+ padding:12px;background:#0c1c2e;border-bottom:1px solid var(--line);
+ color:var(--cyan);font-size:11px;font-weight:bold;letter-spacing:.8px
+}
+.scroll{padding:12px;overflow:auto;min-height:0;flex:1}
+.section{margin-bottom:17px}
+.section h3{font-size:10px;letter-spacing:.7px;color:#d5e5f2;margin:0 0 9px}
+label{display:block;color:var(--muted);font-size:10px;margin:9px 0 5px}
+select,input,button{
+ width:100%;padding:9px;background:#0a1929;color:var(--text);
+ border:1px solid #36516b;border-radius:4px;font-size:11px
+}
+button{background:#126071;border-color:#1a8290;font-weight:bold;cursor:pointer}
+button:hover{background:#187a86}
+button:disabled{opacity:.5;cursor:wait}
+.secondary{background:#263d53;border-color:#435d73}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:8px}
+.notice{
+ background:#0b1a2b;border:1px solid var(--line);border-radius:5px;
+ padding:9px;color:var(--muted);font-size:10px;line-height:1.55;
+ white-space:pre-wrap
+}
+.note{color:var(--muted);font-size:10px;line-height:1.55}
+.check{display:flex;align-items:center;gap:7px;margin:8px 0;color:var(--muted);font-size:10px}
+.check input{width:auto;margin:0}
+.factor{
+ display:flex;justify-content:space-between;align-items:center;gap:7px;
+ padding:8px 0;border-bottom:1px solid #263b50
+}
+.factor strong{font-size:10px}
+.factor small{display:block;color:var(--muted);font-size:9px;margin-top:3px}
+.tag{font-size:9px;background:#263b50;color:#d6e4ee;padding:4px 6px;border-radius:4px;white-space:nowrap}
+.tag.ok{background:#164638;color:#91e6c0}
+.tag.warn{background:#51411f;color:#ffdb8b}
+.map-panel{position:relative;min-width:0}
+.mapbar{
+ display:flex;justify-content:space-between;align-items:center;gap:8px;
+ padding:9px 11px;background:#0c1c2e;border-bottom:1px solid var(--line)
+}
+.mapbar strong{font-size:11px}
+.mapbar select{width:160px}
+.mapwrap{flex:1;min-height:0;position:relative;background:#142536}
+#map{position:absolute;inset:0;width:100%;height:100%;background:#142536}
+#mapStatus{
+ position:absolute;left:10px;bottom:10px;z-index:500;
+ padding:7px 9px;background:#091827eF;border:1px solid #536b7d;
+ color:white;border-radius:4px;font-size:10px;max-width:90%;pointer-events:none
+}
+.mapfoot{
+ background:#0c1c2e;border-top:1px solid var(--line);
+ padding:8px 10px;color:var(--muted);font-size:10px
+}
+.kpis{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.kpi{padding:9px;background:var(--panel2);border:1px solid var(--line);border-radius:5px}
+.kpi small{font-size:9px;color:var(--muted)}
+.kpi strong{display:block;font-size:17px;margin-top:5px}
+.chartbox{
+ height:175px;padding:8px;margin:9px 0;background:#0b1a2b;
+ border:1px solid var(--line);border-radius:5px
+}
+.chartbox canvas{max-height:155px}
+.legend{display:flex;align-items:center;gap:7px;margin:6px 0;color:var(--muted);font-size:10px}
+.swatch{width:12px;height:12px;border-radius:2px;flex-shrink:0}
+table{width:100%;border-collapse:collapse;font-size:10px}
+th,td{text-align:left;padding:7px 4px;border-bottom:1px solid var(--line)}
+th{color:#d3e4f1}td{color:var(--muted)}
+.progress{height:6px;background:#263b50;border-radius:5px;overflow:hidden;margin-top:10px}
+#progressBar{height:100%;width:0;background:var(--cyan);transition:width .25s}
+footer{
+ padding:9px 12px;border-top:1px solid var(--line);
+ color:var(--muted);font-size:9px;line-height:1.6
+}
+.leaflet-control-attribution{font-size:9px}
+.site-label{
+ background:#10263b;border:1px solid #f4c34e;color:#fff;
+ padding:2px 4px;border-radius:2px;font-size:9px;font-weight:bold
+}
+@media(max-width:1050px){
+ html,body{height:auto;min-height:100%;overflow:auto}
+ main{height:auto;grid-template-columns:1fr}
+ .panel{min-height:320px}
+ .map-panel{height:560px}
+ .mapwrap{min-height:0}
+}
+</style>
+</head>
+
+<body>
+
+<header>
+ <div>
+  <div class="brand">SILKYSINGZ <span>GEOAI</span> | RAINWATER HARVESTING INTELLIGENCE</div>
+  <div class="subtitle">The Gambia • Village-Based Site Screening • Terrain • Rainfall • Settlement Accessibility</div>
+ </div>
+ <div class="headmeta">GIS-CARTOGRAPHY UNIT<br>GAMBIA BUREAU OF STATISTICS</div>
+</header>
+
+<main>
+
+<!-- LEFT: CONTROLS -->
+<section class="panel">
+ <div class="panel-title">01 / CONTROL CENTRE</div>
+ <div class="scroll">
+
+  <div class="section">
+   <h3>BOUNDARY DATA SOURCE</h3>
+   <div id="boundaryStatus" class="notice">Loading Gambia EA boundaries...</div>
+  </div>
+
+  <div class="section">
+   <h3>02 / GEOGRAPHIC SELECTION</h3>
+   <label>Region</label>
+   <select id="region"><option value="">Loading...</option></select>
+   <label>Local Government Area</label>
+   <select id="lga"><option value="">All LGAs</option></select>
+   <label>District</label>
+   <select id="district"><option value="">All districts</option></select>
+   <label>Ward</label>
+   <select id="ward"><option value="">All wards</option></select>
+   <button id="zoomBtn" class="secondary" style="margin-top:9px">ZOOM TO SELECTED AREA</button>
+   <div id="selectionInfo" class="notice" style="margin-top:8px">Waiting for boundary data.</div>
+  </div>
+
+  <div class="section">
+   <h3>03 / RAINFALL REFERENCE PERIOD</h3>
+   <label>Start year</label>
+   <select id="startYear">
+    <option>2010</option><option>2012</option><option selected>2015</option>
+    <option>2018</option><option>2020</option>
+   </select>
+   <label>End year</label>
+   <select id="endYear">
+    <option>2020</option><option>2022</option><option selected>2024</option><option>2025</option>
+   </select>
+   <p class="note">Historical precipitation is extracted from Open-Meteo. The period is used to estimate average annual rainfall.</p>
+  </div>
+
+  <div class="section">
+   <h3>04 / SITE SCREENING SETTINGS</h3>
+   <label>Candidate grid density</label>
+   <select id="gridDensity">
+    <option value="8,12">Low — approximately 96 grid positions</option>
+    <option value="12,18" selected>Medium — approximately 216 grid positions</option>
+    <option value="16,24">High — approximately 384 grid positions</option>
+   </select>
+   <label>Maximum village-to-site search distance</label>
+   <select id="siteDistance">
+    <option value="3000">3 km</option>
+    <option value="5000" selected>5 km</option>
+    <option value="10000">10 km</option>
+    <option value="15000">15 km</option>
+   </select>
+   <label>Target number of sites (when no settlements are found)</label>
+   <select id="targetSites">
+    <option>20</option><option selected>40</option><option>60</option><option>80</option>
+   </select>
+  </div>
+
+  <div class="section">
+   <h3>05 / AHP CRITERIA WEIGHTS</h3>
+   <div class="factor"><div><strong>Rainfall potential</strong><small>Historical mean annual rainfall</small></div><span class="tag">37%</span></div>
+   <div class="factor"><div><strong>Gentle slope</strong><small>Derived terrain-gradient proxy</small></div><span class="tag">21%</span></div>
+   <div class="factor"><div><strong>Valley position</strong><small>Relative local elevation proxy</small></div><span class="tag">11%</span></div>
+   <div class="factor"><div><strong>Near people</strong><small>Distance to mapped settlements</small></div><span class="tag">21%</span></div>
+   <div class="factor"><div><strong>Waterway access gap</strong><small>Distance to mapped waterways proxy</small></div><span class="tag">11%</span></div>
+   <p class="note">Weights follow the illustrative proportions in the reference image and are normalised to 100%. They are not a validated pairwise-comparison AHP matrix.</p>
+  </div>
+
+  <div class="section">
+   <h3>06 / DATA EXTRACTION</h3>
+   <div class="factor"><div><strong>Elevation</strong><small>Copernicus DEM GLO-90 via Open-Meteo</small></div><span id="sElev" class="tag">PENDING</span></div>
+   <div class="factor"><div><strong>Rainfall</strong><small>Historical daily precipitation</small></div><span id="sRain" class="tag">PENDING</span></div>
+   <div class="factor"><div><strong>Settlements</strong><small>OpenStreetMap place features</small></div><span id="sSettle" class="tag">PENDING</span></div>
+   <div class="factor"><div><strong>Waterways</strong><small>OpenStreetMap waterway features</small></div><span id="sWater" class="tag">PENDING</span></div>
+   <div class="factor"><div><strong>Flow accumulation</strong><small>Hydrological routing raster required</small></div><span class="tag warn">NOT MODELLED</span></div>
+   <div class="factor"><div><strong>Catchment runoff</strong><small>Requires hydrological catchment modelling</small></div><span class="tag warn">NOT MODELLED</span></div>
+  </div>
+
+  <div class="section">
+   <h3>07 / PROCESSING</h3>
+   <button id="runBtn">RUN SITE SUITABILITY ASSESSMENT</button>
+   <div class="progress"><div id="progressBar"></div></div>
+   <div id="progressText" class="note">Ready to process.</div>
+   <div class="actions">
+    <button id="resetBtn" class="secondary">RESET RESULTS</button>
+    <button id="retryBtn" class="secondary">RETRY EXTRACTION</button>
+   </div>
+   <div class="actions">
+    <button id="csvBtn" class="secondary">EXPORT CSV</button>
+    <button id="geoBtn" class="secondary">EXPORT GEOJSON</button>
+   </div>
+   <div id="processStatus" class="notice" style="margin-top:9px">No assessment has been run.</div>
+  </div>
+
+  <div class="section">
+   <h3>08 / MAP LAYERS</h3>
+   <label class="check"><input type="checkbox" id="showBoundary" checked> Administrative boundary</label>
+   <label class="check"><input type="checkbox" id="showSuitability" checked> Suitability sample points</label>
+   <label class="check"><input type="checkbox" id="showSites" checked> Recommended harvesting sites</label>
+   <label class="check"><input type="checkbox" id="showSettlements" checked> Settlements</label>
+   <label class="check"><input type="checkbox" id="showWater" checked> Mapped waterways</label>
+  </div>
+ </div>
+ <footer>
+  Produced by Ansu Singhateh<br>
+  GIS Analyst | GIS-Cartography Unit | Gambia Bureau of Statistics<br>
+  GBoS GEOAI • Research and educational use
+ </footer>
+</section>
+
+<!-- CENTRE: MAP -->
+<section class="panel map-panel">
+ <div class="mapbar">
+  <strong>INTERACTIVE SITE SUITABILITY MAP | THE GAMBIA</strong>
+  <select id="basemap">
+   <option value="street">Street Map</option>
+   <option value="satellite" selected>Satellite Imagery</option>
+   <option value="terrain">Terrain / Topography</option>
+   <option value="light">Light Cartographic</option>
+  </select>
+ </div>
+ <div class="mapwrap">
+  <div id="map"></div>
+  <div id="mapStatus">Initialising map...</div>
+ </div>
+ <div id="mapFoot" class="mapfoot">Gambia rainwater harvesting suitability screening • Select an area and run the assessment.</div>
+</section>
+
+<!-- RIGHT: ANALYTICS -->
+<section class="panel">
+ <div class="panel-title">09 / ANALYTICS & SITE PRIORITISATION</div>
+ <div class="scroll">
+
+  <div class="section">
+   <h3>ASSESSMENT SUMMARY</h3>
+   <div class="kpis">
+    <div class="kpi"><small>Selected EA polygons</small><strong id="kEA">0</strong></div>
+    <div class="kpi"><small>Candidate locations</small><strong id="kCandidates">0</strong></div>
+    <div class="kpi"><small>Settlements detected</small><strong id="kSettlements">0</strong></div>
+    <div class="kpi"><small>Recommended sites</small><strong id="kSites">0</strong></div>
+    <div class="kpi"><small>Mean rainfall (mm/year)</small><strong id="kRain">—</strong></div>
+    <div class="kpi"><small>Mean elevation (m)</small><strong id="kElev">—</strong></div>
+    <div class="kpi"><small>Very high suitability</small><strong id="kVeryHigh">0</strong></div>
+    <div class="kpi"><small>Mean suitability score</small><strong id="kScore">—</strong></div>
+   </div>
+  </div>
+
+  <div class="section">
+   <h3>SUITABILITY CLASS DISTRIBUTION</h3>
+   <div class="chartbox"><canvas id="classChart"></canvas></div>
+   <div class="legend"><span class="swatch" style="background:#8be0c5"></span>Very High — top 5%</div>
+   <div class="legend"><span class="swatch" style="background:#32a9a8"></span>High — next 10%</div>
+   <div class="legend"><span class="swatch" style="background:#216b7b"></span>Moderate — next 20%</div>
+   <div class="legend"><span class="swatch" style="background:#8b9aa8"></span>Low</div>
+   <div class="legend"><span class="swatch" style="background:#465667"></span>Very Low</div>
+  </div>
+
+  <div class="section">
+   <h3>CRITERIA CONTRIBUTION</h3>
+   <div class="chartbox"><canvas id="factorChart"></canvas></div>
+  </div>
+
+  <div class="section">
+   <h3>TOP RECOMMENDED SITES</h3>
+   <table>
+    <thead><tr><th>Rank</th><th>Village / Site</th><th>Score</th><th>Class</th></tr></thead>
+    <tbody id="siteTable"><tr><td colspan="4">Run assessment first.</td></tr></tbody>
+   </table>
+  </div>
+
+  <div class="section">
+   <h3>SUITABILITY AREA SUMMARY</h3>
+   <table>
+    <thead><tr><th>Class</th><th>Samples</th><th>Share</th></tr></thead>
+    <tbody id="classTable"></tbody>
+   </table>
+   <p class="note">Area estimates are not calculated from sample counts. A defensible area estimate requires a classified raster or area-weighted polygon analysis.</p>
+  </div>
+
+  <div class="section">
+   <h3>DATA COVERAGE & LIMITATIONS</h3>
+   <div id="quality" class="notice">No assessment results available.</div>
+  </div>
+
+  <div class="section">
+   <h3>METHODOLOGY</h3>
+   <p class="note">Candidate points are generated inside selected Enumeration Area polygons. Elevation values are retrieved from the Open-Meteo elevation service, which uses Copernicus DEM GLO-90.</p>
+   <p class="note">Rainfall is calculated from annual sums of daily precipitation over the selected reference period using the Open-Meteo historical archive.</p>
+   <p class="note">Slope and valley position are screening proxies derived from the sampled elevation surface. They are not equivalent to a full-resolution DEM terrain analysis.</p>
+   <p class="note">Settlement proximity and mapped-waterway proximity are derived from OpenStreetMap features. OpenStreetMap coverage may be incomplete.</p>
+   <p class="note">The waterway-distance criterion is not a verified inventory of drinking-water access or existing water infrastructure.</p>
+   <p class="note">This is a preliminary suitability screening model. It does not calculate reservoir capacity, runoff volume, infiltration, groundwater recharge or engineering feasibility.</p>
+  </div>
+ </div>
+</section>
+</main>
+
+<script>
+"use strict";
+
+/* ==========================================================
+   CONFIGURATION & STATE
+========================================================== */
+const $=id=>document.getElementById(id);
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const fmt=(v,n=1)=>Number.isFinite(v)?Number(v).toFixed(n):"—";
+const mean=a=>{
+ const v=a.filter(Number.isFinite);
+ return v.length?v.reduce((s,x)=>s+x,0)/v.length:null;
+};
+const norm=s=>String(s??"").toLowerCase().replace(/[^a-z0-9]/g,"");
+
+const BOUNDARY_URLS=[
+ "https://raw.githubusercontent.com/silkysingz94-oss/Rainwater-Harvesting-Site-Suitability/main/Census_EAs_Geo.json",
+ "https://cdn.jsdelivr.net/gh/silkysingz94-oss/Rainwater-Harvesting-Site-Suitability@main/Census_EAs_Geo.json"
+];
+
+let allFeatures=[],selectedFeatures=[];
+let candidates=[],settlements=[],waterways=[],recommendedSites=[];
+let boundaryLayer=null,candidateLayer=null,siteLayer=null;
+let settlementLayer=null,waterLayer=null;
+let busy=false,classChart=null,factorChart=null;
+let lastBounds=null;
+
+/* ==========================================================
+   MAP & BASEMAP SWITCHER
+========================================================== */
+const map=L.map("map",{
+ center:[13.45,-15.5],zoom:8,preferCanvas:true,zoomControl:true
+});
+
+const basemaps={
+ street:L.tileLayer(
+  "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+  {subdomains:["a","b","c"],maxZoom:19,attribution:"© OpenStreetMap contributors"}
+ ),
+ satellite:L.tileLayer(
+  "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+  {maxZoom:19,attribution:"Tiles © Esri"}
+ ),
+ terrain:L.tileLayer(
+  "https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png",
+  {subdomains:["a","b","c"],maxZoom:17,attribution:"© OpenStreetMap contributors | © OpenTopoMap"}
+ ),
+ light:L.tileLayer(
+  "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",
+  {subdomains:["a","b","c","d"],maxZoom:20,attribution:"© OpenStreetMap contributors © CARTO"}
+ )
+};
+
+let activeBase=null,baseToken=0;
+
+function switchBasemap(name){
+ if(!basemaps[name])return;
+ const token=++baseToken;
+ $("mapStatus").textContent="SWITCHING TO "+name.toUpperCase()+"...";
+ if(activeBase&&map.hasLayer(activeBase))map.removeLayer(activeBase);
+ activeBase=basemaps[name];
+ activeBase.off("tileerror");
+ activeBase.off("tileload");
+
+ let loaded=false;
+ activeBase.on("tileload",()=>{
+  if(token!==baseToken)return;
+  loaded=true;
+  $("mapStatus").textContent=name.toUpperCase()+" BASEMAP ACTIVE";
+ });
+ activeBase.on("tileerror",()=>{
+  if(token!==baseToken)return;
+  if(!loaded)$("mapStatus").textContent=
+   name.toUpperCase()+" TILE ERROR — SELECT ANOTHER BASEMAP";
+ });
+ activeBase.addTo(map);
+ setTimeout(()=>{
+  if(token!==baseToken)return;
+  map.invalidateSize(true);
+  if(!loaded)$("mapStatus").textContent=
+   name.toUpperCase()+" SELECTED — WAITING FOR MAP TILES";
+ },600);
+}
+$("basemap").addEventListener("change",e=>switchBasemap(e.target.value));
+switchBasemap("satellite");
+
+/* ==========================================================
+   UTILITIES
+========================================================== */
+function setTag(id,msg,kind=""){
+ $(id).textContent=msg;
+ $(id).className="tag "+kind;
+}
+function progress(v,msg){
+ $("progressBar").style.width=v+"%";
+ $("progressText").textContent=msg;
+}
+async function fetchJSON(url,timeout=60000){
+ const controller=new AbortController();
+ const timer=setTimeout(()=>controller.abort(),timeout);
+ try{
+  const response=await fetch(url,{signal:controller.signal});
+  if(!response.ok)throw Error("HTTP "+response.status);
+  return await response.json();
+ }finally{clearTimeout(timer)}
+}
+async function retryJSON(url,tries=2){
+ let err;
+ for(let i=0;i<tries;i++){
+  try{return await fetchJSON(url)}
+  catch(e){err=e;await sleep(600*(i+1))}
+ }
+ throw err;
+}
+function prop(f,names){
+ const p=f.properties||{},keys=Object.keys(p);
+ for(const name of names){
+  const k=keys.find(x=>norm(x)===norm(name));
+  if(k&&p[k]!=null&&String(p[k]).trim()!=="")return p[k];
+ }
+ return "";
+}
+const getRegion=f=>prop(f,["region","regionname","region_name","rconame","RCO","region_code"]);
+const getLGA=f=>prop(f,["lganame","lga_name","lga","lgname"]);
+const getDistrict=f=>prop(f,["distname","district","districtname","district_name"]);
+const getWard=f=>prop(f,["wardname","ward","ward_name"]);
+const unique=a=>[...new Set(a.filter(v=>v!==""&&v!=null).map(String))]
+ .sort((a,b)=>a.localeCompare(b,undefined,{numeric:true}));
+
+/* ==========================================================
+   LOAD ADMINISTRATIVE GEOJSON
+========================================================== */
+async function loadBoundaries(){
+ let lastError=null;
+ for(const url of BOUNDARY_URLS){
+  try{
+   const data=await retryJSON(url,2);
+   allFeatures=(data.features||data).filter(f=>f.geometry&&f.properties);
+   if(!allFeatures.length)throw Error("GeoJSON contains no valid polygons.");
+   $("boundaryStatus").textContent=
+    "BOUNDARY LOADED\n"+allFeatures.length.toLocaleString()+
+    " Enumeration Area polygons retrieved.";
+   fillAdmin();
+   updateSelection();
+   return;
+  }catch(e){lastError=e}
+ }
+ $("boundaryStatus").textContent=
+  "BOUNDARY ERROR\n"+(lastError?.message||"Unable to load the boundary data.");
+}
+
+function fillSelect(id,values,label){
+ const select=$(id),previous=select.value;
+ select.innerHTML="";
+ const first=document.createElement("option");
+ first.value="";first.textContent=label;select.appendChild(first);
+ values.forEach(v=>{
+  const o=document.createElement("option");
+  o.value=v;o.textContent=v;select.appendChild(o);
+ });
+ if(values.includes(previous))select.value=previous;
+}
+function fillAdmin(){
+ fillSelect("region",unique(allFeatures.map(getRegion)),"All regions — National");
+ refreshAdmin();
+}
+function refreshAdmin(){
+ const a=allFeatures.filter(f=>!$("region").value||String(getRegion(f))===$("region").value);
+ fillSelect("lga",unique(a.map(getLGA)),"All LGAs");
+ const b=a.filter(f=>!$("lga").value||String(getLGA(f))===$("lga").value);
+ fillSelect("district",unique(b.map(getDistrict)),"All districts");
+ const c=b.filter(f=>!$("district").value||String(getDistrict(f))===$("district").value);
+ fillSelect("ward",unique(c.map(getWard)),"All wards");
+}
+function updateSelection(){
+ selectedFeatures=allFeatures.filter(f=>
+  (!$("region").value||String(getRegion(f))===$("region").value)&&
+  (!$("lga").value||String(getLGA(f))===$("lga").value)&&
+  (!$("district").value||String(getDistrict(f))===$("district").value)&&
+  (!$("ward").value||String(getWard(f))===$("ward").value)
+ );
+ $("kEA").textContent=selectedFeatures.length;
+ $("selectionInfo").textContent=
+  "Selected EA polygons: "+selectedFeatures.length+
+  "\nRegion: "+($("region").value||"All")+
+  "\nLGA: "+($("lga").value||"All")+
+  "\nDistrict: "+($("district").value||"All")+
+  "\nWard: "+($("ward").value||"All");
+ drawBoundary();
+ clearResults();
+}
+["region","lga","district","ward"].forEach((id,i)=>{
+ $(id).addEventListener("change",()=>{
+  if(i<3)refreshAdmin();
+  updateSelection();
+ });
+});
+
+function walkCoords(c,fn){
+ if(typeof c[0]==="number")fn(c[0],c[1]);
+ else c.forEach(x=>walkCoords(x,fn));
+}
+function getBounds(features){
+ let minX=180,minY=90,maxX=-180,maxY=-90;
+ features.forEach(f=>walkCoords(f.geometry.coordinates,(x,y)=>{
+  minX=Math.min(minX,x);maxX=Math.max(maxX,x);
+  minY=Math.min(minY,y);maxY=Math.max(maxY,y);
+ }));
+ return{minX,minY,maxX,maxY};
+}
+function pointInRing(x,y,ring){
+ let inside=false;
+ for(let i=0,j=ring.length-1;i<ring.length;j=i++){
+  const a=ring[i],b=ring[j];
+  if(((a[1]>y)!==(b[1]>y))&&
+   x<(b[0]-a[0])*(y-a[1])/(b[1]-a[1]+1e-20)+a[0])inside=!inside;
+ }
+ return inside;
+}
+function pointInPoly(x,y,poly){
+ if(!pointInRing(x,y,poly[0]))return false;
+ for(let i=1;i<poly.length;i++)if(pointInRing(x,y,poly[i]))return false;
+ return true;
+}
+function insideGeometry(x,y,g){
+ if(g.type==="Polygon")return pointInPoly(x,y,g.coordinates);
+ if(g.type==="MultiPolygon")return g.coordinates.some(p=>pointInPoly(x,y,p));
+ return false;
+}
+function drawBoundary(){
+ if(boundaryLayer)map.removeLayer(boundaryLayer);
+ if(!selectedFeatures.length)return;
+ boundaryLayer=L.geoJSON(
+  {type:"FeatureCollection",features:selectedFeatures},
+  {style:{color:"#8be0d0",weight:1,fillColor:"#32a9a8",fillOpacity:.025}}
+ );
+ if($("showBoundary").checked)boundaryLayer.addTo(map);
+ map.fitBounds(boundaryLayer.getBounds(),{padding:[18,18]});
+ setTimeout(()=>map.invalidateSize(),150);
+}
+$("zoomBtn").addEventListener("click",()=>{
+ if(boundaryLayer)map.fitBounds(boundaryLayer.getBounds(),{padding:[18,18]});
+});
+
+/* ==========================================================
+   GENERATE CANDIDATE POINTS INSIDE EA POLYGONS
+========================================================== */
+function generateCandidates(){
+ const [rows,cols]=$("gridDensity").value.split(",").map(Number);
+ const b=getBounds(selectedFeatures);
+ lastBounds=b;
+ const out=[],seen=new Set();
+ const dx=(b.maxX-b.minX)/cols,dy=(b.maxY-b.minY)/rows;
+ let id=0;
+ for(let r=0;r<rows;r++){
+  for(let c=0;c<cols;c++){
+   const x=b.minX+(c+.5)*dx,y=b.minY+(r+.5)*dy;
+   const key=x.toFixed(5)+","+y.toFixed(5);
+   if(seen.has(key))continue;
+   const feature=selectedFeatures.find(f=>insideGeometry(x,y,f.geometry));
+   if(!feature)continue;
+   seen.add(key);
+   out.push({
+    id:++id,lon:x,lat:y,
+    ea:prop(feature,["feacode","eaname","ea_code","ea"]),
+    region:getRegion(feature),lga:getLGA(feature),
+    district:getDistrict(feature),ward:getWard(feature),
+    elevation:null,rainfall:null,slope:null,valley:null,
+    settlementDistance:null,waterwayDistance:null,
+    score:null,classification:"Incomplete"
+   });
+  }
+ }
+ return out;
+}
+
+/* ==========================================================
+   ELEVATION EXTRACTION — COPERNICUS GLO-90
+========================================================== */
+async function extractElevation(points){
+ let loaded=0;
+ for(let i=0;i<points.length;i+=100){
+  const batch=points.slice(i,i+100);
+  const url="https://api.open-meteo.com/v1/elevation?latitude="+
+   batch.map(p=>p.lat.toFixed(5)).join(",")+
+   "&longitude="+batch.map(p=>p.lon.toFixed(5)).join(",");
+  try{
+   const data=await retryJSON(url,3);
+   batch.forEach((p,j)=>{
+    p.elevation=Number.isFinite(data.elevation?.[j])?data.elevation[j]:null;
+    if(Number.isFinite(p.elevation))loaded++;
+   });
+  }catch(e){
+   for(const p of batch){
+    try{
+     const d=await retryJSON(
+      "https://api.open-meteo.com/v1/elevation?latitude="+p.lat+"&longitude="+p.lon,2
+     );
+     p.elevation=Number.isFinite(d.elevation?.[0])?d.elevation[0]:null;
+     if(Number.isFinite(p.elevation))loaded++;
+    }catch{p.elevation=null}
+   }
+  }
+  progress(8+Math.round(23*Math.min(i+batch.length,points.length)/points.length),
+   "Extracting elevation: "+Math.min(i+batch.length,points.length)+" / "+points.length);
+ }
+ return loaded;
+}
+
+/* ==========================================================
+   RAINFALL EXTRACTION
+   Multi-location Open-Meteo archive request
+========================================================== */
+async function extractRainfall(points){
+ const sy=Number($("startYear").value),ey=Number($("endYear").value);
+ let loaded=0;
+ for(let i=0;i<points.length;i+=20){
+  const batch=points.slice(i,i+20);
+  const lat=batch.map(p=>p.lat.toFixed(4)).join(",");
+  const lon=batch.map(p=>p.lon.toFixed(4)).join(",");
+  const url="https://archive-api.open-meteo.com/v1/archive?latitude="+lat+
+   "&longitude="+lon+"&start_date="+sy+"-01-01&end_date="+ey+
+   "-12-31&daily=precipitation_sum&timezone=GMT";
+  try{
+   const result=await retryJSON(url,2);
+   const locations=Array.isArray(result)?result:[result];
+   locations.forEach((d,j)=>{
+    const annual={};
+    (d.daily?.time||[]).forEach((date,k)=>{
+     const value=d.daily.precipitation_sum?.[k];
+     const year=Number(date.slice(0,4));
+     if(Number.isFinite(value))annual[year]=(annual[year]||0)+value;
+    });
+    batch[j].rainfall=mean(Object.values(annual));
+    if(Number.isFinite(batch[j].rainfall))loaded++;
+   });
+  }catch(e){
+   /* Keep missing values null. Do not replace them with zero. */
+   batch.forEach(p=>p.rainfall=null);
+  }
+  progress(32+Math.round(28*Math.min(i+batch.length,points.length)/points.length),
+   "Extracting historical rainfall: "+Math.min(i+batch.length,points.length)+" / "+points.length);
+  await sleep(150);
+ }
+ return loaded;
+}
+
+/* ==========================================================
+   TERRAIN SCREENING PROXIES
+========================================================== */
+function distanceMetres(a,b){
+ const R=6371000,rad=Math.PI/180;
+ const p1=a.lat*rad,p2=b.lat*rad;
+ const dp=(b.lat-a.lat)*rad,dl=(b.lon-a.lon)*rad;
+ const h=Math.sin(dp/2)**2+
+  Math.cos(p1)*Math.cos(p2)*Math.sin(dl/2)**2;
+ return 2*R*Math.asin(Math.sqrt(h));
+}
+function deriveTerrain(){
+ const valid=candidates.filter(p=>Number.isFinite(p.elevation));
+ candidates.forEach(p=>{
+  if(!Number.isFinite(p.elevation)){
+   p.slope=null;p.valley=null;return;
+  }
+  const near=valid.filter(q=>q!==p)
+   .map(q=>({q,d:distanceMetres(p,q)}))
+   .filter(x=>x.d>20&&x.d<5000)
+   .sort((a,b)=>a.d-b.d).slice(0,8);
+  if(!near.length){p.slope=null;p.valley=null;return}
+  const gradients=near.map(x=>Math.abs(x.q.elevation-p.elevation)/x.d);
+  p.slope=Math.atan(Math.max(...gradients))*180/Math.PI;
+  const meanNeighbour=mean(near.map(x=>x.q.elevation));
+  p.valley=Number.isFinite(meanNeighbour)?meanNeighbour-p.elevation:null;
+ });
+}
+
+/* ==========================================================
+   OPENSTREETMAP EXTRACTION
+   Settlements and waterways in selected bounding box
+========================================================== */
+async function overpass(query){
+ const endpoints=[
+  "https://overpass-api.de/api/interpreter",
+  "https://overpass.kumi.systems/api/interpreter"
+ ];
+ let last;
+ for(const endpoint of endpoints){
+  try{
+   const response=await fetch(endpoint,{
+    method:"POST",
+    headers:{"Content-Type":"application/x-www-form-urlencoded;charset=UTF-8"},
+    body:"data="+encodeURIComponent(query)
+   });
+   if(!response.ok)throw Error("Overpass HTTP "+response.status);
+   return await response.json();
+  }catch(e){last=e}
+ }
+ throw last||Error("Overpass unavailable");
+}
+async function extractOSM(){
+ const b=lastBounds;
+ const bbox=[b.minY,b.minX,b.maxY,b.maxX].join(",");
+ const settlementQuery=
+  '[out:json][timeout:90];('+
+  'node["place"~"city|town|village|hamlet|isolated_dwelling|suburb"]('+bbox+');'+
+  'way["place"~"city|town|village|hamlet|isolated_dwelling|suburb"]('+bbox+');'+
+  'relation["place"~"city|town|village|hamlet"]('+bbox+');'+
+  ');out center;';
+ const waterQuery=
+  '[out:json][timeout:90];way["waterway"~"river|stream|canal|drain|ditch"]('+bbox+');out geom;';
+ const [settleData,waterData]=await Promise.all([
+  overpass(settlementQuery),overpass(waterQuery)
+ ]);
+
+ const seen=new Set();
+ settlements=(settleData.elements||[]).map(e=>{
+  const lat=e.lat??e.center?.lat,lon=e.lon??e.center?.lon;
+  if(!Number.isFinite(lat)||!Number.isFinite(lon))return null;
+  const key=lat.toFixed(5)+","+lon.toFixed(5);
+  if(seen.has(key))return null;
+  seen.add(key);
+  return{
+   id:e.id,lat,lon,
+   name:e.tags?.name||e.tags?.["name:en"]||"Unnamed settlement",
+   type:e.tags?.place||"settlement"
+  };
+ }).filter(Boolean);
+
+ waterways=(waterData.elements||[]).filter(e=>e.geometry?.length>1).map(e=>({
+  id:e.id,type:e.tags?.waterway||"waterway",
+  coords:e.geometry.map(p=>[p.lat,p.lon])
+ }));
+
+ const maxDistance=Number($("siteDistance").value);
+ candidates.forEach(p=>{
+  const sd=settlements.map(s=>distanceMetres(p,s));
+  p.settlementDistance=sd.length?Math.min(...sd):null;
+  let wd=Infinity;
+  waterways.forEach(w=>{
+   w.coords.forEach(c=>{
+    const d=distanceMetres(p,{lat:c[0],lon:c[1]});
+    if(d<wd)wd=d;
+   });
+  });
+  p.waterwayDistance=Number.isFinite(wd)?wd:null;
+ });
+ return{settlements:settlements.length,waterways:waterways.length,maxDistance};
+}
+
+/* ==========================================================
+   NORMALISATION AND SUITABILITY MODEL
+========================================================== */
+function normalise(values,invert=false){
+ const valid=values.filter(Number.isFinite);
+ if(!valid.length)return values.map(()=>null);
+ const min=Math.min(...valid),max=Math.max(...valid);
+ return values.map(v=>{
+  if(!Number.isFinite(v))return null;
+  if(max===min)return .5;
+  const n=(v-min)/(max-min);
+  return invert?1-n:n;
+ });
+}
+function normaliseRange(values,fn){
+ const transformed=values.map(v=>Number.isFinite(v)?fn(v):null);
+ return normalise(transformed);
+}
+const classColours={
+ "Very High":"#8be0c5",
+ "High":"#32a9a8",
+ "Moderate":"#216b7b",
+ "Low":"#8b9aa8",
+ "Very Low":"#465667",
+ "Incomplete":"#b7bec7"
+};
+function assignClass(){
+ const valid=candidates.filter(p=>Number.isFinite(p.score)).sort((a,b)=>b.score-a.score);
+ const n=valid.length;
+ valid.forEach((p,i)=>{
+  const percentile=(i+1)/n;
+  if(percentile<=.05)p.classification="Very High";
+  else if(percentile<=.15)p.classification="High";
+  else if(percentile<=.35)p.classification="Moderate";
+  else if(percentile<=.70)p.classification="Low";
+  else p.classification="Very Low";
+ });
+ candidates.filter(p=>!Number.isFinite(p.score)).forEach(p=>p.classification="Incomplete");
+}
+function calculateSuitability(){
+ const rain=normalise(candidates.map(p=>p.rainfall));
+ const gentle=normaliseRange(candidates.map(p=>p.slope),v=>-v);
+ const valley=normalise(candidates.map(p=>p.valley));
+ const people=normalise(candidates.map(p=>p.settlementDistance),true);
+ const waterGap=normalise(candidates.map(p=>p.waterwayDistance));
+
+ /* The displayed reference weights sum to 101; normalise to 100. */
+ const weights=[
+  ["rain",37],["slope",21],["valley",11],["people",21],["water",11]
+ ];
+ const totalWeight=weights.reduce((s,x)=>s+x[1],0);
+
+ candidates.forEach((p,i)=>{
+  const values={
+   rain:rain[i],slope:gentle[i],valley:valley[i],
+   people:people[i],water:waterGap[i]
+  };
+  let numerator=0,denominator=0;
+  weights.forEach(([key,w])=>{
+   if(Number.isFinite(values[key])){
+    numerator+=values[key]*w;
+    denominator+=w;
+   }
+  });
+  p.score=denominator?100*numerator/denominator:null;
+  p.coverage=denominator/totalWeight;
+  p.components=values;
+ });
+ assignClass();
+}
+
+/* ==========================================================
+   SELECT RECOMMENDED SITES
+   Prefer the highest-ranked candidate near each settlement.
+========================================================== */
+function chooseSites(){
+ const maxDistance=Number($("siteDistance").value);
+ const used=new Set(),sites=[];
+
+ if(settlements.length){
+  settlements.forEach(s=>{
+   const options=candidates.filter(p=>
+    Number.isFinite(p.score)&&
+    !used.has(p.id)&&
+    distanceMetres(p,s)<=maxDistance
+   ).sort((a,b)=>b.score-a.score);
+   if(options.length){
+    const chosen=options[0];
+    used.add(chosen.id);
+    sites.push({
+     ...chosen,settlementName:s.name,
+     settlementType:s.type,
+     villageLat:s.lat,villageLon:s.lon,
+     villageDistance:distanceMetres(chosen,s)
+    });
+   }
+  });
+ }
+
+ /* If there are no mapped settlements, return top-ranked candidates. */
+ if(!sites.length){
+  const target=Number($("targetSites").value);
+  candidates.filter(p=>Number.isFinite(p.score))
+   .sort((a,b)=>b.score-a.score).slice(0,target)
+   .forEach(p=>sites.push({...p,settlementName:"Candidate site"}));
+ }
+
+ sites.sort((a,b)=>b.score-a.score);
+ recommendedSites=sites;
+}
+
+/* ==========================================================
+   RENDER MAP LAYERS
+========================================================== */
+function clearLayer(layer){
+ if(layer&&map.hasLayer(layer))map.removeLayer(layer);
+}
+function renderCandidateLayer(){
+ clearLayer(candidateLayer);
+ candidateLayer=L.layerGroup();
+ candidates.forEach(p=>{
+  const colour=classColours[p.classification]||classColours.Incomplete;
+  L.circleMarker([p.lat,p.lon],{
+   radius:5,color:"#d8edf1",weight:.7,
+   fillColor:colour,fillOpacity:.95
+  }).bindPopup(
+   "<b>Candidate "+p.id+"</b><br>"+
+   "Suitability: "+fmt(p.score)+" / 100<br>"+
+   "Class: "+p.classification+"<br>"+
+   "Elevation: "+fmt(p.elevation)+" m<br>"+
+   "Rainfall: "+fmt(p.rainfall)+" mm/year<br>"+
+   "Slope proxy: "+fmt(p.slope,2)+"°<br>"+
+   "Settlement distance: "+fmt(p.settlementDistance/1000,2)+" km"
+  ).addTo(candidateLayer);
+ });
+ if($("showSuitability").checked)candidateLayer.addTo(map);
+}
+function renderSiteLayer(){
+ clearLayer(siteLayer);
+ siteLayer=L.layerGroup();
+ recommendedSites.forEach((p,i)=>{
+  const marker=L.circleMarker([p.lat,p.lon],{
+   radius:7,color:"#f5d05d",weight:2,fillColor:"#14283a",fillOpacity:1
+  });
+  marker.bindPopup(
+   "<b>Recommended Site "+(i+1)+"</b><br>"+
+   "Associated settlement: "+p.settlementName+"<br>"+
+   "Suitability score: "+fmt(p.score)+" / 100<br>"+
+   "Class: "+p.classification+"<br>"+
+   "Elevation: "+fmt(p.elevation)+" m<br>"+
+   "Rainfall: "+fmt(p.rainfall)+" mm/year<br>"+
+   "Distance from settlement: "+fmt(p.villageDistance/1000,2)+" km"
+  );
+  marker.addTo(siteLayer);
+ });
+ if($("showSites").checked)siteLayer.addTo(map);
+}
+function renderSettlementLayer(){
+ clearLayer(settlementLayer);
+ settlementLayer=L.layerGroup();
+ settlements.forEach(s=>{
+  L.circleMarker([s.lat,s.lon],{
+   radius:2.5,color:"#f0f4f5",weight:1,fillColor:"#f0f4f5",fillOpacity:.9
+  }).bindPopup("<b>"+s.name+"</b><br>OSM place type: "+s.type)
+   .addTo(settlementLayer);
+ });
+ if($("showSettlements").checked)settlementLayer.addTo(map);
+}
+function renderWaterLayer(){
+ clearLayer(waterLayer);
+ waterLayer=L.layerGroup();
+ waterways.forEach(w=>{
+  L.polyline(w.coords,{color:"#4d9cbd",weight:1.5,opacity:.8})
+   .bindPopup("Mapped OSM waterway: "+w.type)
+   .addTo(waterLayer);
+ });
+ if($("showWater").checked)waterLayer.addTo(map);
+}
+function renderAllLayers(){
+ renderCandidateLayer();
+ renderSiteLayer();
+ renderSettlementLayer();
+ renderWaterLayer();
+ $("mapFoot").textContent=
+  candidates.length+" candidate points | "+
+  recommendedSites.length+" recommended sites | "+
+  settlements.length+" settlements | "+
+  waterways.length+" mapped waterways";
+}
+$("showBoundary").addEventListener("change",e=>{
+ if(!boundaryLayer)return;
+ e.target.checked?boundaryLayer.addTo(map):clearLayer(boundaryLayer);
+});
+$("showSuitability").addEventListener("change",renderCandidateLayer);
+$("showSites").addEventListener("change",renderSiteLayer);
+$("showSettlements").addEventListener("change",renderSettlementLayer);
+$("showWater").addEventListener("change",renderWaterLayer);
+
+/* ==========================================================
+   ANALYTICS
+========================================================== */
+function buildCharts(){
+ const classes=["Very High","High","Moderate","Low","Very Low"];
+ const valid=candidates.filter(p=>Number.isFinite(p.score));
+
+ if(classChart)classChart.destroy();
+ classChart=new Chart($("classChart"),{
+  type:"bar",
+  data:{
+   labels:classes,
+   datasets:[{
+    data:classes.map(c=>valid.filter(p=>p.classification===c).length),
+    backgroundColor:classes.map(c=>classColours[c])
+   }]
+  },
+  options:{
+   responsive:true,maintainAspectRatio:false,
+   plugins:{legend:{display:false}},
+   scales:{
+    x:{ticks:{color:"#c7d7e5"},grid:{display:false}},
+    y:{beginAtZero:true,ticks:{color:"#c7d7e5",precision:0},grid:{color:"#294158"}}
+   }
+  }
+ });
+
+ if(factorChart)factorChart.destroy();
+ factorChart=new Chart($("factorChart"),{
+  type:"bar",
+  data:{
+   labels:["Rainfall","Gentle slope","Valley position","Near settlements","Waterway gap"],
+   datasets:[{
+    data:[37,21,11,21,11],
+    backgroundColor:["#43c7c5","#54aeb3","#367f93","#e7b94f","#7b9bb1"]
+   }]
+  },
+  options:{
+   indexAxis:"y",responsive:true,maintainAspectRatio:false,
+   plugins:{legend:{display:false}},
+   scales:{
+    x:{beginAtZero:true,max:40,ticks:{color:"#c7d7e5"},grid:{color:"#294158"}},
+    y:{ticks:{color:"#c7d7e5"},grid:{display:false}}
+   }
+  }
+ });
+}
+function updateTables(){
+ const classes=["Very High","High","Moderate","Low","Very Low"];
+ const valid=candidates.filter(p=>Number.isFinite(p.score));
+ $("classTable").innerHTML=classes.map(c=>{
+  const n=valid.filter(p=>p.classification===c).length;
+  return "<tr><td>"+c+"</td><td>"+n+"</td><td>"+
+   fmt(valid.length?100*n/valid.length:0)+"%</td></tr>";
+ }).join("")+
+ "<tr><td>Incomplete</td><td>"+(candidates.length-valid.length)+
+ "</td><td>"+fmt(candidates.length?100*(candidates.length-valid.length)/candidates.length:0)+"%</td></tr>";
+
+ $("siteTable").innerHTML=recommendedSites.slice(0,20).map((p,i)=>
+  "<tr><td>"+(i+1)+"</td><td>"+escapeHTML(p.settlementName||"Candidate")+
+  "</td><td>"+fmt(p.score)+"</td><td>"+p.classification+"</td></tr>"
+ ).join("")||"<tr><td colspan='4'>No recommended sites.</td></tr>";
+}
+function escapeHTML(s){
+ return String(s).replace(/[&<>"']/g,c=>({
+  "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+ }[c]));
+}
+function updateAnalytics(){
+ const valid=candidates.filter(p=>Number.isFinite(p.score));
+ $("kEA").textContent=selectedFeatures.length;
+ $("kCandidates").textContent=candidates.length;
+ $("kSettlements").textContent=settlements.length;
+ $("kSites").textContent=recommendedSites.length;
+ $("kRain").textContent=fmt(mean(candidates.map(p=>p.rainfall)));
+ $("kElev").textContent=fmt(mean(candidates.map(p=>p.elevation)));
+ $("kVeryHigh").textContent=valid.filter(p=>p.classification==="Very High").length;
+ $("kScore").textContent=fmt(mean(valid.map(p=>p.score)));
+
+ buildCharts();
+ updateTables();
+
+ $("quality").textContent=
+  "CANDIDATE LOCATIONS: "+candidates.length+
+  "\nELEVATION RECORDS: "+candidates.filter(p=>Number.isFinite(p.elevation)).length+
+  "\nRAINFALL RECORDS: "+candidates.filter(p=>Number.isFinite(p.rainfall)).length+
+  "\nSETTLEMENT FEATURES: "+settlements.length+
+  "\nWATERWAY FEATURES: "+waterways.length+
+  "\nRECOMMENDED SITES: "+recommendedSites.length+
+  "\n\nMODEL COVERAGE: "+
+  fmt(valid.length?100*mean(valid.map(p=>p.coverage)):0)+"% average weighted-factor coverage"+
+  "\n\nLIMITATIONS:"+
+  "\n• Slope and valley position are sample-derived proxies."+
+  "\n• Waterway proximity is not an inventory of drinking-water points."+
+  "\n• No flow accumulation or routed catchment model."+
+  "\n• No runoff volume, storage capacity or engineering design."+
+  "\n• OSM settlement and waterway completeness is not guaranteed."+
+  "\n• Suitability classes are relative to the selected area.";
+}
+
+/* ==========================================================
+   MAIN ASSESSMENT
+========================================================== */
+async function runAssessment(){
+ if(busy)return;
+ if(!selectedFeatures.length){
+  alert("Select a region, LGA, district or ward first.");
+  return;
+ }
+ const sy=Number($("startYear").value),ey=Number($("endYear").value);
+ if(ey<sy){alert("End year must be after start year.");return}
+
+ busy=true;
+ $("runBtn").disabled=true;
+ $("retryBtn").disabled=true;
+ clearResults();
+
+ try{
+  candidates=generateCandidates();
+  if(!candidates.length)throw Error("No candidate points could be generated inside the selected boundaries.");
+
+  progress(3,"Generated "+candidates.length+" candidate locations.");
+  $("processStatus").textContent="Candidate points generated. Starting extraction.";
+
+  setTag("sElev","RUNNING","warn");
+  const elevationCount=await extractElevation(candidates);
+  setTag("sElev",elevationCount+" LOADED",elevationCount?"ok":"warn");
+
+  deriveTerrain();
+
+  setTag("sRain","RUNNING","warn");
+  const rainCount=await extractRainfall(candidates);
+  setTag("sRain",rainCount+" LOADED",rainCount?"ok":"warn");
+
+  progress(64,"Querying OpenStreetMap settlements and waterways...");
+  setTag("sSettle","QUERYING","warn");
+  setTag("sWater","QUERYING","warn");
+  try{
+   const osm=await extractOSM();
+   setTag("sSettle",osm.settlements+" FOUND",osm.settlements?"ok":"warn");
+   setTag("sWater",osm.waterways+" FOUND",osm.waterways?"ok":"warn");
+  }catch(e){
+   settlements=[];waterways=[];
+   candidates.forEach(p=>{
+    p.settlementDistance=null;p.waterwayDistance=null;
+   });
+   setTag("sSettle","UNAVAILABLE","warn");
+   setTag("sWater","UNAVAILABLE","warn");
+   $("processStatus").textContent=
+    "OpenStreetMap extraction unavailable: "+e.message+
+    "\nThe assessment will continue using available factors.";
+  }
+
+  progress(82,"Calculating suitability scores...");
+  calculateSuitability();
+  chooseSites();
+  renderAllLayers();
+  updateAnalytics();
+
+  progress(100,"Assessment completed.");
+  $("processStatus").textContent=
+   "ASSESSMENT COMPLETED\n"+
+   "Candidate locations: "+candidates.length+
+   "\nElevation records: "+elevationCount+
+   "\nRainfall records: "+rainCount+
+   "\nSettlements detected: "+settlements.length+
+   "\nMapped waterways: "+waterways.length+
+   "\nRecommended sites: "+recommendedSites.length+
+   "\n\nMissing factor values were left blank and excluded from each location's weighted score.";
+ }catch(e){
+  $("processStatus").textContent="PROCESSING ERROR\n"+e.message;
+  progress(0,"Processing stopped.");
+ }finally{
+  busy=false;
+  $("runBtn").disabled=false;
+  $("retryBtn").disabled=false;
+ }
+}
+
+/* ==========================================================
+   RETRY EXTRACTION
+========================================================== */
+async function retryExtraction(){
+ if(busy)return;
+ if(!candidates.length){
+  alert("Run the assessment first.");
+  return;
+ }
+ busy=true;
+ $("runBtn").disabled=true;
+ $("retryBtn").disabled=true;
+ try{
+  const missingElev=candidates.filter(p=>!Number.isFinite(p.elevation));
+  const missingRain=candidates.filter(p=>!Number.isFinite(p.rainfall));
+  if(missingElev.length){
+   setTag("sElev","RETRYING","warn");
+   await extractElevation(missingElev);
+  }
+  if(missingRain.length){
+   setTag("sRain","RETRYING","warn");
+   await extractRainfall(missingRain);
+  }
+  deriveTerrain();
+  try{
+   await extractOSM();
+   setTag("sSettle",settlements.length+" FOUND","ok");
+   setTag("sWater",waterways.length+" FOUND","ok");
+  }catch(e){}
+  calculateSuitability();
+  chooseSites();
+  renderAllLayers();
+  updateAnalytics();
+  $("processStatus").textContent="RETRY COMPLETED.";
+ }catch(e){
+  $("processStatus").textContent="RETRY ERROR\n"+e.message;
+ }finally{
+  busy=false;
+  $("runBtn").disabled=false;
+  $("retryBtn").disabled=false;
+ }
+}
+$("runBtn").addEventListener("click",runAssessment);
+$("retryBtn").addEventListener("click",retryExtraction);
+
+/* ==========================================================
+   RESET
+========================================================== */
+function clearResults(){
+ candidates=[];
+ settlements=[];
+ waterways=[];
+ recommendedSites=[];
+ clearLayer(candidateLayer);
+ clearLayer(siteLayer);
+ clearLayer(settlementLayer);
+ clearLayer(waterLayer);
+ candidateLayer=siteLayer=settlementLayer=waterLayer=null;
+
+ ["kCandidates","kSettlements","kSites","kVeryHigh"].forEach(id=>$(id).textContent="0");
+ ["kRain","kElev","kScore"].forEach(id=>$(id).textContent="—");
+ $("classTable").innerHTML="";
+ $("siteTable").innerHTML="<tr><td colspan='4'>Run assessment first.</td></tr>";
+ $("quality").textContent="No assessment results available.";
+ $("processStatus").textContent="No assessment has been run.";
+ $("mapFoot").textContent="Select an area and run the assessment.";
+ progress(0,"Ready.");
+}
+$("resetBtn").addEventListener("click",()=>{
+ if(busy)return;
+ clearResults();
+ ["sElev","sRain","sSettle","sWater"].forEach(id=>setTag(id,"PENDING"));
+});
+
+/* ==========================================================
+   EXPORTS
+========================================================== */
+function downloadFile(filename,content,type){
+ const blob=new Blob([content],{type});
+ const url=URL.createObjectURL(blob);
+ const a=document.createElement("a");
+ a.href=url;a.download=filename;
+ document.body.appendChild(a);a.click();a.remove();
+ setTimeout(()=>URL.revokeObjectURL(url),1000);
+}
+const exportFields=[
+ "id","lat","lon","ea","region","lga","district","ward",
+ "elevation","rainfall","slope","valley","settlementDistance",
+ "waterwayDistance","score","classification","coverage"
+];
+$("csvBtn").addEventListener("click",()=>{
+ if(!candidates.length){alert("Run assessment first.");return}
+ const csv=[
+  exportFields.join(","),
+  ...candidates.map(p=>exportFields.map(k=>
+   '"'+String(p[k]??"").replace(/"/g,'""')+'"'
+  ).join(","))
+ ].join("\n");
+ downloadFile("Gambia_Rainwater_Suitability_Candidates.csv",csv,"text/csv");
+});
+$("geoBtn").addEventListener("click",()=>{
+ if(!candidates.length){alert("Run assessment first.");return}
+ const features=candidates.map(p=>({
+  type:"Feature",
+  geometry:{type:"Point",coordinates:[p.lon,p.lat]},
+  properties:{...p}
+ }));
+ recommendedSites.forEach((p,i)=>{
+  features.push({
+   type:"Feature",
+   geometry:{type:"Point",coordinates:[p.lon,p.lat]},
+   properties:{
+    feature_type:"recommended_harvesting_site",
+    rank:i+1,settlement:p.settlementName,
+    score:p.score,classification:p.classification
+   }
+  });
+ });
+ downloadFile(
+  "Gambia_Rainwater_Harvesting_Suitability.geojson",
+  JSON.stringify({type:"FeatureCollection",features},null,2),
+  "application/geo+json"
+ );
+});
+
+/* ==========================================================
+   STARTUP
+========================================================== */
+window.addEventListener("resize",()=>map.invalidateSize());
+loadBoundaries();
+setTimeout(()=>map.invalidateSize(true),500);
+</script>
+</body>
+</html>
